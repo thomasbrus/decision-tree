@@ -1,6 +1,6 @@
 # DecisionTree
 
-**TODO: Add description**
+Decision tree in Elixir (work in progress)...
 
 ## Installation
 
@@ -27,5 +27,9 @@ CSV.read(examples/...)
 
 - [x] Handles discrete and continuous attributes
 - [x] No dependencies
+
+# Todo
+- [ ] Handling missing values
 - [ ] Serialization from and to JSON
-- [ ] Ability to specify number of concurrent workers
+- [ ] Concurrency for speed improvements on large datasets
+- [ ] Tree pruning
