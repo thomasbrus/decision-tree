@@ -28,7 +28,7 @@ CSV.read(examples/...)
 - [x] Handles discrete and continuous attributes
 - [x] No dependencies
 
-# Todo
+## Todo
 - [ ] Handling missing values
 - [ ] Serialization from and to JSON
 - [ ] Concurrency for speed improvements on large datasets
