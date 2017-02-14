@@ -25,6 +25,7 @@ CSV.read(examples/...)
 
 ## Features
 
-- [x] Classify discrete and continuous attributes
-- [x] Serialization from and to JSON
+- [x] Handles discrete and continuous attributes
 - [x] No dependencies
+- [ ] Serialization from and to JSON
+- [ ] Ability to specify number of concurrent workers
