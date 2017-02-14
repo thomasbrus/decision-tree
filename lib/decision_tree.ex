@@ -35,12 +35,14 @@ defmodule DecisionTree do
         Dataset.majority_class(training_set) |> Tree.leaf
 
       true ->
+        # Split dataset according to optimal information gain
         {split_attribute, split_value} =
           Dataset.optimal_split(training_set, &Dataset.information_gain/3)
 
         {left_dataset, right_dataset} =
           Dataset.split(training_set, split_attribute, split_value)
 
+        # Remove split attribute so that it is not used again
         left_dataset = Dataset.remove_attribute(left_dataset, split_attribute)
         right_dataset = Dataset.remove_attribute(right_dataset, split_attribute)
 
