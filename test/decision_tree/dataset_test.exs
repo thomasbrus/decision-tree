@@ -29,64 +29,90 @@ defmodule DecisionTree.DatasetTest do
     ["rain",      71,  80,  true,   :do_not_play]
   ]
 
-  @data Enum.map(@rows, fn(row) ->
+  @instances Enum.map(@rows, fn(row) ->
     Enum.zip(@headers, row) |> Enum.into(%{})
   end)
 
+  @dataset %Dataset{
+    instances: @instances,
+    class_attribute: :advice
+  }
+
   test "split/3 splits the dataset based on an attribute and value" do
-    dataset = Dataset.new(@data)
+    {left_dataset, right_dataset} = Dataset.split(@dataset, :outlook, "sunny")
 
-    {left_split, right_split} = Dataset.split(dataset, :outlook, "sunny")
+    assert length(left_dataset.instances) == 5
+    assert length(right_dataset.instances) == 9
 
-    assert length(left_split.instances) == 5
-    assert length(right_split.instances) == 9
+    {left_dataset, right_dataset} = Dataset.split(@dataset, :temperature, 80)
 
-    {left_split, right_split} = Dataset.split(dataset, :temperature, 80)
-
-    assert length(left_split.instances) == 10
-    assert length(right_split.instances) == 4
+    assert length(left_dataset.instances) == 10
+    assert length(right_dataset.instances) == 4
   end
 
-  test "information_gain_split/2 splits the dataset by maximizing the information gain" do
-    dataset = Dataset.new(@data)
-
-    {left_split, _} = Dataset.information_gain_split(dataset, :advice)
-
-    assert Enum.all?(left_split.instances, &(&1.outlook == "overcast"))
-    assert Enum.all?(left_split.instances, &(&1.advice == :play))
+  test "optimal_split/2 finds the optimal split according to the given evaluation method" do
+    optimal_split = Dataset.optimal_split(@dataset, &Dataset.information_gain/3)
+    assert optimal_split == {:outlook, "overcast"}
   end
+
+  # test "information_gain_split/2 splits the dataset by maximizing the information gain" do
+  #   dataset = Dataset.new(@data)
+
+  #   {left_dataset, _} = Dataset.information_gain_split(dataset, :advice)
+
+  #   # assert Enum.all?(left_dataset.instances, &(&1.outlook == "overcast"))
+  #   assert Enum.all?(left_dataset.instances, &(&1.advice == :play))
+  # end
 
   test "percentage_split/2 splits the dataset percentage-wise" do
-    dataset = Dataset.new(@data)
+    {left_dataset, right_dataset} = Dataset.percentage_split(@dataset, 6/7)
 
-    {left_split, right_split} = Dataset.percentage_split(dataset, 6/7)
-
-    assert length(left_split.instances) == 12
-    assert length(right_split.instances) == 2
+    assert length(left_dataset.instances) == 12
+    assert length(right_dataset.instances) == 2
   end
 
   test "entropy/2 returns the entropy of a dataset" do
-    dataset = Dataset.new(@data)
-    assert_in_delta Dataset.entropy(dataset, :advice), 0.94029, 0.00001
+    entropy = Dataset.entropy(@dataset)
+    assert_in_delta entropy, 0.94029, 0.00001
+  end
+
+  test "information_gain/2 returns the gain in entropy when splitting on a certain attribute" do
+    gain = Dataset.information_gain(@dataset, :outlook, "overcast")
+    assert_in_delta gain, 0.22600, 0.00001
+  end
+
+  test "homogeneous?/2 is not implemented for empty datasets" do
+    assert_raise FunctionClauseError, fn ->
+      %{@dataset | instances: []} |> Dataset.homogeneous?
+    end
   end
 
   test "homogeneous?/2 returns true when the dataset contains one instance" do
-    dataset = @data |> Enum.take(1) |> Dataset.new
-    assert Dataset.homogeneous?(dataset, :advice)
+    dataset = %{@dataset | instances: Enum.take(@instances, 1)}
+    assert Dataset.homogeneous?(dataset)
   end
 
   test "homogeneous?/2 returns true when the dataset contains instances from one class only" do
-    dataset = @data |> Enum.filter(&(&1.advice == :play)) |> Dataset.new
-    assert Dataset.homogeneous?(dataset, :advice)
+    dataset = %{@dataset | instances: Enum.filter(@instances, &(&1.advice == :play))}
+    assert Dataset.homogeneous?(dataset)
   end
 
   test "homogeneous?/2 returns false when the dataset contains instances from multiple classes" do
-    dataset = Dataset.new(@data)
-    refute Dataset.homogeneous?(dataset, :advice)
+    refute Dataset.homogeneous?(@dataset)
   end
 
   test "histogram/2 retuns a map of attribute values and their frequencies" do
-    histogram = @data |> Dataset.new |> Dataset.histogram(:outlook)
+    histogram = Dataset.histogram(@dataset, :outlook)
     assert histogram == %{"sunny" => 5, "overcast" => 4, "rain" => 5}
+  end
+
+  test "attributes/1 returns the attributes of a dataset" do
+    attributes = Dataset.attributes(@dataset)
+    assert attributes == [:humidity, :outlook, :temperature, :windy]
+  end
+
+  test "majority_class/2 returns the most frequent class in the dataset" do
+    class = Dataset.majority_class(@dataset)
+    assert class == :play
   end
 end
