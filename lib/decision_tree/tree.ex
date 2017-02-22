@@ -1,27 +1,33 @@
 defmodule DecisionTree.Tree do
+  alias DecisionTree.Tree.{Leaf,Node}
+
   def leaf(class) do
-    {:leaf, class}
+    Leaf.new(class)
   end
 
   def node(split_attribute, split_value, left, right) do
-    {:node, split_attribute, split_value, left, right}
+    Node.new(split_attribute, split_value, left, right)
   end
 
-  def traverse({:leaf, _class} = leaf, _instance) do
+  def traverse(%Leaf{} = leaf, _instance) do
     leaf
   end
 
-  def traverse({:node, split_attribute, split_value, left, right}, instance) when is_number(split_value) do
-    case instance[split_attribute] < split_value do
-      true -> traverse(left, instance)
-      false -> traverse(right, instance)
+  def traverse(%Node{split_value: split_value} = node, instance) when is_number(split_value) do
+    case instance[node.split_attribute] < split_value do
+      true -> traverse(node.left, instance)
+      false -> traverse(node.right, instance)
     end
   end
 
-  def traverse({:node, split_attribute, split_value, left, right}, instance) do
-    case instance[split_attribute] == split_value do
-      true -> traverse(left, instance)
-      false -> traverse(right, instance)
+  def traverse(%Node{split_value: split_value} = node, instance) do
+    case instance[node.split_attribute] == split_value do
+      true -> traverse(node.left, instance)
+      false -> traverse(node.right, instance)
     end
+  end
+
+  def prune(tree) do
+    tree
   end
 end

@@ -33,10 +33,7 @@ defmodule DecisionTree.DatasetTest do
     Enum.zip(@headers, row) |> Enum.into(%{})
   end)
 
-  @dataset %Dataset{
-    instances: @instances,
-    class_attribute: :advice
-  }
+  @dataset Dataset.new(@instances, :advice)
 
   test "split/3 splits the dataset based on an attribute and value" do
     {left_dataset, right_dataset} = Dataset.split(@dataset, :outlook, "sunny")

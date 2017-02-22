@@ -5,6 +5,10 @@ defmodule DecisionTree.Dataset do
   @enforce_keys [:instances, :class_attribute]
   defstruct [:instances, :class_attribute]
 
+  def new(instances, class_attribute) do
+    %Dataset{instances: instances, class_attribute: class_attribute}
+  end
+
   def split(%Dataset{} = dataset, attribute, value) when is_number(value) do
     split(dataset, fn(instance) -> Map.fetch!(instance, attribute) < value end)
   end

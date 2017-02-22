@@ -18,15 +18,19 @@ defmodule DecisionTree do
     # defimpl DecisionTree.Encoder, for: Node
   end
 
-  def build(%Dataset{instances: []}) do
+  def build(%Dataset{} = training_set) do
+    training_set |> train |> prune
+  end
+
+  def train(%Dataset{instances: []}) do
     raise ArgumentError, message: "cannot build decision tree on empty dataset"
   end
 
-  def build(%Dataset{instances: [instance], class_attribute: class_attribute}) do
+  def train(%Dataset{instances: [instance], class_attribute: class_attribute}) do
     %DecisionTree{root: Map.fetch!(instance, class_attribute) |> Tree.leaf}
   end
 
-  def build(%Dataset{} = training_set) do
+  def train(%Dataset{} = training_set) do
     %DecisionTree{root: cond do
       Dataset.homogeneous?(training_set) ->
         Dataset.class_values(training_set) |> hd |> Tree.leaf
@@ -35,7 +39,7 @@ defmodule DecisionTree do
         Dataset.majority_class(training_set) |> Tree.leaf
 
       true ->
-        # Split dataset according to optimal information gain
+        # Split dataset so that optimal information gain is achieved
         {split_attribute, split_value} =
           Dataset.optimal_split(training_set, &Dataset.information_gain/3)
 
@@ -57,7 +61,7 @@ defmodule DecisionTree do
     class
   end
 
-  # def prune(%DecisionTree{} = decision_tree) do
-  #   {decision_tree | root: Tree.prune(decision_tree)}
-  # end
+  def prune(%DecisionTree{} = decision_tree) do
+    %{decision_tree | root: Tree.prune(decision_tree)}
+  end
 end
