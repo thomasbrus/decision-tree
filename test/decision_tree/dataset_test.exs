@@ -3,7 +3,7 @@ defmodule DecisionTree.DatasetTest do
 
   alias DecisionTree.Dataset
 
-  doctest DecisionTree
+  doctest DecisionTree.Dataset
 
   # http://www2.cs.uregina.ca/~dbd/cs831/notes/ml/dtrees/c4.5/c4.5_prob1.html
   # http://www.onlamp.com/pub/a/python/2006/02/09/ai_decision_trees.html

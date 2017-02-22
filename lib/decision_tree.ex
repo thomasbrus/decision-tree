@@ -8,6 +8,10 @@ defmodule DecisionTree do
   alias __MODULE__, as: DecisionTree
   alias DecisionTree.{Dataset, Tree}
 
+  defp new(root) do
+    %DecisionTree{root: root}
+  end
+
   def load(_filename) do
     # File.read |> Decoder.decode(...)
     # defimpl DecisionTree.Decoder, for: Node
@@ -31,7 +35,7 @@ defmodule DecisionTree do
   end
 
   def train(%Dataset{} = training_set) do
-    %DecisionTree{root: cond do
+    new(cond do
       Dataset.homogeneous?(training_set) ->
         Dataset.class_values(training_set) |> hd |> Tree.leaf
 
@@ -53,15 +57,14 @@ defmodule DecisionTree do
         {left_tree, right_tree} = {build(left_dataset), build(right_dataset)}
 
         Tree.node(split_attribute, split_value, left_tree.root, right_tree.root)
-    end}
+    end)
   end
 
   def classify(%DecisionTree{root: root}, %{} = instance) do
-    {:leaf, class} = Tree.traverse(root, instance)
-    class
+    Tree.traverse(root, instance).class
   end
 
-  def prune(%DecisionTree{} = decision_tree) do
-    %{decision_tree | root: Tree.prune(decision_tree)}
+  def prune(%DecisionTree{root: root} = decision_tree) do
+    %{decision_tree | root: Tree.prune(root)}
   end
 end
